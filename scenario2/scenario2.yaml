@@ -1,0 +1,143 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: scenario2
+  labels:
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: flaskinfo
+  namespace: scenario2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: flaskinfo
+    version: v1
+  name: flaskinfo-v1
+  namespace: scenario2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flaskinfo
+      version: v1
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: flaskinfo
+        version: v1
+    spec:
+      serviceAccountName: flaskinfo
+      containers:
+      - image: docker.io/virajnemane/v1app:1
+        name: flaskinfo
+        ports:
+        - containerPort: 9080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: flaskinfo
+    version: v2
+  name: flaskinfo-v2
+  namespace: scenario2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flaskinfo
+      version: v2
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: flaskinfo
+        version: v2
+    spec:
+      serviceAccountName: flaskinfo
+      containers:
+      - image: docker.io/virajnemane/v2app:1
+        name: flaskinfo
+        ports:
+        - containerPort: 9080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaskinfo-service
+  labels:
+    app: flaskinfo
+  namespace: scenario2
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: flaskinfo
+---
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: flaskinfo-gateway
+  namespace: scenario2
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 8080
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: flaskinfo-vs
+  namespace: scenario2
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - flaskinfo-gateway
+  http:
+  - match:
+    - headers:
+        x-forwarded-for:
+          exact: "49.36.97.87"
+    route:
+    - destination:
+        host: flaskinfo-service
+        port:
+          number: 9080
+        subset: v1
+  - route:
+    - destination:
+        host: flaskinfo-service
+        port:
+          number: 9080
+        subset: v2
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: flaskinfo-dr
+  namespace: scenario2
+spec:
+  host: flaskinfo-service
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
