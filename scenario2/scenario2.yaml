@@ -112,8 +112,8 @@ spec:
   http:
   - match:
     - headers:
-        x-forwarded-for:
-          exact: "49.36.97.87"
+        user-agent:
+          prefix: "WebSniffer" # Use https://websniffer.com/ for testing
     route:
     - destination:
         host: flaskinfo-service
