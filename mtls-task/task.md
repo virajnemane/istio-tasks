@@ -85,3 +85,23 @@ spec:
 This does not allow traffic from lapp ns as service port is 8000
 
 ## check if global policy at root namespace is working
+
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: "default"
+  namespace: "istio-system"
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: enforce-mtls-lapp
+  namespace: lapp
+spec:
+  host: "*.lapp.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
