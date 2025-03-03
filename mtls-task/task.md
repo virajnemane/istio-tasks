@@ -105,3 +105,24 @@ spec:
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+
+
+Does PeerAuthentication in Root Namespace with STRICT Mode Work Without a DestinationRule?
+
+No, it does not fully enforce mTLS in all cases without a DestinationRule.
+🔍 Why?
+
+    PeerAuthentication (STRICT mode) only applies to the server (destination)
+        It rejects plaintext traffic but does not force the client to send mTLS.
+        If no DestinationRule is applied, the client may default to plaintext (which Istio allows by default).
+
+    Default Behavior of Istio Clients
+        If no DestinationRule is defined, Istio may allow the client to send plaintext requests.
+        If the server (lapp) does not have Istio injection, it cannot enforce mTLS itself.
+
+🚀 Conclusion
+
+    Yes, PeerAuthentication in root NS alone is not enough to enforce mTLS everywhere.
+    You must also configure a DestinationRule to force the client to use mTLS.
+
+📌 Without a DestinationRule, plaintext traffic may still pass depending on Istio’s default client behavior!
