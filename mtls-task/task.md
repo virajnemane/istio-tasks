@@ -48,7 +48,7 @@ spec:
 ## Create policy for httpbin application in app2 to be STRICT mode but it should be disable for port 8080
 
 https://istio.io/latest/docs/reference/config/security/peer_authentication/#:~:text=mode%3A%20STRICT-,Policy,-that%20enables%20strict
-
+```yaml
 apiVersion: security.istio.io/v1
 kind: PeerAuthentication
 metadata:
@@ -63,11 +63,12 @@ spec:
   portLevelMtls:  ### This is the container port and not the service port 
     8080: 
       mode: DISABLE
+```
 This allows traffic from lapp ns as container port is 8080 
 
 
 ## Create policy for httpbin application in app2 to be STRICT mode but it should be disable for port 8000
-
+```yaml
 apiVersion: security.istio.io/v1
 kind: PeerAuthentication
 metadata:
@@ -82,10 +83,11 @@ spec:
   portLevelMtls:  ### This is the container port and not the service port 
     8000: 
       mode: DISABLE
+```
 This does not allow traffic from lapp ns as service port is 8000
 
 ## check if global policy at root namespace is working
-
+```yaml
 apiVersion: security.istio.io/v1
 kind: PeerAuthentication
 metadata:
@@ -105,7 +107,7 @@ spec:
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
-
+```
 
 Does PeerAuthentication in Root Namespace with STRICT Mode Work Without a DestinationRule?
 
