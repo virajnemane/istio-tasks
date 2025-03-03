@@ -1,0 +1,178 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: scenario123
+  labels:
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: flaskinfo
+  namespace: scenario123
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: flaskinfo
+    version: v1
+  name: flaskinfo-v1
+  namespace: scenario123
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flaskinfo
+      version: v1
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: flaskinfo
+        version: v1
+    spec:
+      serviceAccountName: flaskinfo
+      containers:
+      - image: docker.io/virajnemane/v1app:1
+        name: flaskinfo
+        ports:
+        - containerPort: 9080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: flaskinfo
+    version: v2
+  name: flaskinfo-v2
+  namespace: scenario123
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flaskinfo
+      version: v2
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: flaskinfo
+        version: v2
+    spec:
+      serviceAccountName: flaskinfo
+      containers:
+      - image: docker.io/virajnemane/v2app:1
+        name: flaskinfo
+        ports:
+        - containerPort: 9080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: flaskinfo
+    version: v3
+  name: flaskinfo-v3
+  namespace: scenario123
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flaskinfo
+      version: v3
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: flaskinfo
+        version: v3
+    spec:
+      serviceAccountName: flaskinfo
+      containers:
+      - image: docker.io/virajnemane/v3app:1
+        name: flaskinfo
+        ports:
+        - containerPort: 9080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaskinfo-service
+  labels:
+    app: flaskinfo
+  namespace: scenario123
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: flaskinfo
+---
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: flaskinfo-gateway
+  namespace: scenario123
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 8080
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: flaskinfo-vs
+  namespace: scenario123
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - flaskinfo-gateway
+  http:
+  - route:
+    - destination:
+        host: flaskinfo-service
+        port:
+          number: 9080
+        subset: v1
+      weight: 10
+    - destination:
+        host: flaskinfo-service
+        port:
+          number: 9080
+        subset: v2
+      weight: 10
+    - destination:
+        host: flaskinfo-service
+        port:
+          number: 9080
+        subset: v3
+      weight: 80
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: flaskinfo-dr
+  namespace: scenario123
+spec:
+  host: flaskinfo-service
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+  - name: v3
+    labels:
+      version: v3
