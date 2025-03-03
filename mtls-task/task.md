@@ -63,7 +63,7 @@ spec:
   portLevelMtls:  ### This is the container port and not the service port 
     8080: 
       mode: DISABLE
-This allows traffic as container port is 8080
+This allows traffic from lapp ns as container port is 8080 
 
 
 ## Create policy for httpbin application in app2 to be STRICT mode but it should be disable for port 8000
@@ -82,6 +82,6 @@ spec:
   portLevelMtls:  ### This is the container port and not the service port 
     8000: 
       mode: DISABLE
-This does not allow traffic as service port is 8000
+This does not allow traffic from lapp ns as service port is 8000
 
 ## check if global policy at root namespace is working
