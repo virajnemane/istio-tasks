@@ -47,6 +47,41 @@ spec:
 
 ## Create policy for httpbin application in app2 to be STRICT mode but it should be disable for port 8080
 
+https://istio.io/latest/docs/reference/config/security/peer_authentication/#:~:text=mode%3A%20STRICT-,Policy,-that%20enables%20strict
+
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: app2
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  mtls:
+    mode: STRICT
+  portLevelMtls:  ### This is the container port and not the service port 
+    8080: 
+      mode: DISABLE
+This allows traffic as container port is 8080
+
+
 ## Create policy for httpbin application in app2 to be STRICT mode but it should be disable for port 8000
+
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: app2
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  mtls:
+    mode: STRICT
+  portLevelMtls:  ### This is the container port and not the service port 
+    8000: 
+      mode: DISABLE
+This does not allow traffic as service port is 8000
 
 ## check if global policy at root namespace is working
