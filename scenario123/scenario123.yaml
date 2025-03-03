@@ -139,25 +139,22 @@ spec:
   gateways:
   - flaskinfo-gateway
   http:
+  - match:
+    - headers:
+        X-Forwarded-For:
+          prefix: "192.168.0.0"
+    route:
+    - destination:
+        host: flaskinfo-service
+        port:
+          number: 9080
+        subset: v3
   - route:
     - destination:
         host: flaskinfo-service
         port:
           number: 9080
         subset: v1
-      weight: 10
-    - destination:
-        host: flaskinfo-service
-        port:
-          number: 9080
-        subset: v2
-      weight: 10
-    - destination:
-        host: flaskinfo-service
-        port:
-          number: 9080
-        subset: v3
-      weight: 80
 ---
 apiVersion: networking.istio.io/v1
 kind: DestinationRule
