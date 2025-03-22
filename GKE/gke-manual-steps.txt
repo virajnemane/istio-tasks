@@ -1,0 +1,136 @@
+gcloud compute instances create cks-master1 --zone=europe-west1-c \
+--machine-type=e2-medium \
+--image=ubuntu-2004-focal-v20220419 \
+--image-project=ubuntu-os-cloud \
+--boot-disk-size=50GB
+
+
+gcloud compute instances create cks-worker1 --zone=europe-west1-c \
+--machine-type=e2-medium \
+--image=ubuntu-2004-focal-v20220419 \
+--image-project=ubuntu-os-cloud \
+--boot-disk-size=50GB
+
+
+istioctl manifest generate --set profile=demo > generated-manifest.yaml
+
+
+
+gcloud container clusters create my-gke-cluster \
+    --zone europe-west1-c \
+    --num-nodes 3 \
+    --machine-type e2-standard-4 \
+    --enable-ip-alias
+
+
+gcloud container clusters create my-gke-cluster \
+    --zone europe-west1-c \
+    --num-nodes 3 \
+    --machine-type e2-standard-4 \
+    --enable-ip-alias 
+    --no-enable-protection
+
+
+gcloud container clusters create my-gke-cluster1 \
+    --zone europe-west1-c \
+    --num-nodes 3 \
+    --machine-type e2-standard-4 \
+    --enable-ip-alias \
+    --enable-dataplane-v2
+
+
+istioctl uninstall --purge -y
+
+
+istioctl install --set profile=demo --set components.cni.enabled=false -y
+
+
+10.112.0.253/24
+
+10.132.0.0/20
+
+10.112.0.0/14
+
+gcloud container clusters create my-gke-cluster2 \
+    --zone europe-west1-c \
+    --num-nodes 3 \
+    --machine-type e2-standard-4 \
+    --enable-ip-alias \
+    --enable-dataplane-v2
+    --services-secondary-range-name=my-services-range \
+    --services-ipv4-cidr=10.132.8.0/22
+----------------------------------------------------------------
+
+gcloud compute networks subnets create my-gke-subnet \
+    --network=default \
+    --region=europe-west1 \
+    
+    --secondary-range my-pods-range=10.112.0.0/14,my-services-range=10.132.8.0/22
+
+
+
+gcloud container clusters create my-gke-cluster3 \
+    --zone europe-west1-c \
+    --num-nodes 3 \
+    --machine-type e2-standard-4 \
+    --enable-ip-alias \
+    --enable-dataplane-v2 \
+    --subnetwork=my-gke-subnet \
+    --cluster-secondary-range-name=my-pods-range \
+    --services-secondary-range-name=my-services-range
+
+
+
+240.24.0.0/14 - pod
+240.28.0.0/14 - svc
+
+
+
+gcloud container clusters create my-gke-cluster \
+    --zone europe-west1-c \
+    --num-nodes 3 \
+    --machine-type e2-standard-4 \
+    --enable-ip-alias \
+    --enable-dataplane-v2 \
+    --network=default \
+    --subnetwork=default \
+    --cluster-secondary-range-name=pod \
+    --services-secondary-range-name=svc
+
+
+istioctl install --set profile=demo --set components.cni.enabled=false -y
+
+
+kubectl apply -f https://raw.githubusercontent.com/virajnemane/istio-tasks/refs/heads/main/scenario1/scenario1.yaml
+
+
+istio-system   istio-ingressgateway   ClusterIP   240.30.194.180   <none>        15021/TCP,80/TCP,443/TCP,31400/TCP,15443/TCP   109s
+
+
+gcloud container clusters update my-gke-cluster3 \
+    --zone=europe-west1-c \
+    --update-addons=HttpLoadBalancing=ENABLED
+
+
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+    --member="serviceAccount:590902216167-compute@developer.gserviceaccount.com" \
+    --role="roles/container.admin"
+
+istioctl install --set profile=demo
+
+
+cloud.google.com/neg: '{"exposed_ports": {"80":{"name": "gke-svc-neg"}}}'
+
+
+
+gcloud container clusters create my-gke-cluster \
+    --zone europe-west1-c \
+    --num-nodes 3 \
+    --machine-type e2-standard-4 \
+    --enable-ip-alias \
+    --enable-dataplane-v2 \
+    --network=default \
+    --subnetwork=default \
+    --cluster-secondary-range-name=pod \
+    --services-secondary-range-name=svc \
+    --addons=HttpLoadBalancing
